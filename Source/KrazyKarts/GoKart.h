@@ -4,7 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "GoKartMovementComponent.h"
 #include "GoKart.generated.h"
+
+
+
+
+USTRUCT()
+struct FGoKartState
+{
+	GENERATED_USTRUCT_BODY()
+
+		UPROPERTY()
+		FTransform Transform;
+
+	UPROPERTY()
+		FVector Velocity;
+
+	UPROPERTY()
+		FGoKartMove LastMove;
+};
 
 UCLASS()
 class KRAZYKARTS_API AGoKart : public APawn
@@ -19,7 +38,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -27,40 +46,22 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-	FVector GetAirResistance();
+	void ClearAcknowledgeMoves(FGoKartMove LastMove);
 
-	FVector GetRollingResistance();
-
-	void ApplyRotation(float DeltaTime);
-
-	void UpdateLocationFromVelocity(float DeltaTime);
-
-	// The mass of the car (kg)
-	UPROPERTY(EditAnywhere)
-		float Mass = 1000;
-
-	// The force applied to the car when the throttle is fully down (N)
-	UPROPERTY(EditAnywhere)
-		float MaxDrivingForce = 10000;
-
-	// Minimum radius of the car turning circle at full lock (m)
-	UPROPERTY(EditAnywhere)
-		float MinTurningRadius = 10;
-
-	// Higher means more drag
-	UPROPERTY(EditAnywhere)
-		float DragCoefficient = 16;
-
-	// Higher means more rolling resistance
-	UPROPERTY(EditAnywhere)
-		float RollingResistanceCoefficient = 0.015;
-
-	void MoveForword(float Value);
-
+	void MoveForward(float Value);
 	void MoveRight(float Value);
 
-	FVector Velocity;
+	UFUNCTION(Server, Reliable, WithValidation)
+		void Server_SendMove(FGoKartMove Move);
 
-	float Throttle;
-	float SteeringThrow;
+	UPROPERTY(ReplicatedUsing = OnRep_ServerState)
+		FGoKartState ServerState;
+
+	UFUNCTION()
+		void OnRep_ServerState();
+
+	TArray<FGoKartMove> UnacknowledgedMoves;
+
+	UPROPERTY(EditAnywhere)
+		UGoKartMovementComponent* MovementComponent;
 };
