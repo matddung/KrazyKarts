@@ -13,7 +13,6 @@ UGoKartMovementComponent::UGoKartMovementComponent()
 	// ...
 }
 
-
 // Called when the game starts
 void UGoKartMovementComponent::BeginPlay()
 {
@@ -23,13 +22,16 @@ void UGoKartMovementComponent::BeginPlay()
 	
 }
 
-
 // Called every frame
 void UGoKartMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	if (GetOwnerRole() == ROLE_AutonomousProxy || GetOwner()->GetRemoteRole() == ROLE_SimulatedProxy)
+	{
+		LastMove = CreateMove(DeltaTime);
+		SimulateMove(LastMove);
+	}
 }
 
 void UGoKartMovementComponent::SimulateMove(const FGoKartMove& Move)
@@ -70,7 +72,6 @@ FVector UGoKartMovementComponent::GetRollingResistance()
 	float NormalForce = Mass * AccelerationDueToGravity;
 	return -Velocity.GetSafeNormal() * RollingResistanceCoefficient * NormalForce;
 }
-
 
 void UGoKartMovementComponent::ApplyRotation(float DeltaTime, float InSteeringThrow)
 {

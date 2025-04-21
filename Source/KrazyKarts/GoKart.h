@@ -34,8 +34,8 @@ private:
 	void MoveRight(float Value);
 
 	UPROPERTY(VisibleAnywhere)
-		UGoKartMovementComponent* MovementComponent;
+		UGoKartMovementComponent* MovementComp;
 
 	UPROPERTY(VisibleAnywhere)
-		UGoKartMovementReplicator* MovementReplicator;
+		UGoKartMovementReplicator* MovementRepl;
 };
